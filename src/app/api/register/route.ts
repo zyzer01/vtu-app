@@ -1,6 +1,8 @@
-import User, {IUser} from "@/app/models/User";
+import { sendEmail } from "@/app/mail/mail.service";
+import User, { IUser } from "@/app/models/User";
 import dbConnect from "@/lib/db";
 import { calculateVerificationCodeExpiryTime, generateOTP, hashPassword } from "@/utils/auth";
+import { StringConstants } from "@/utils/constants";
 import { NextRequest, NextResponse } from "next/server";
 
 export async function POST(req: NextRequest) {
@@ -9,12 +11,10 @@ export async function POST(req: NextRequest) {
         const body = await req.json();
         const userData: IUser = body;
 
-        const existingUser = await User.findOne({
-            $or: [{ email: userData.email }, { username: userData.username }]
-        });
+        const existingUser = await User.findOne({ email: userData.email });
 
         if (existingUser) {
-            throw new Error('email or username already exists');
+            throw new Error(StringConstants.EMAIL_ALREADY_EXISTS);
         }
 
         const hashedPassword = await hashPassword(userData.password);
@@ -23,10 +23,18 @@ export async function POST(req: NextRequest) {
         const codeExpiry = calculateVerificationCodeExpiryTime()
 
         const newUser = new User({ ...userData, password: hashedPassword, role: userData.role || 'user', emailVerificationCode: code, emailVerificationCodeExpiry: codeExpiry });
+
+        await sendEmail({
+            to: userData.email,
+            subject: StringConstants.CONFIRM_EMAIL,
+            template: 'confirm-email',
+            params: { username: userData.firstName, code: code },
+        });
+
         await newUser.save();
 
-        const response = { 
-            message: 'User registered successfully', 
+        const response = {
+            message: StringConstants.REGISTRATION_SUCCESS,
             user: {
                 id: newUser._id,
                 username: newUser.username,

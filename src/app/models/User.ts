@@ -2,7 +2,6 @@ import mongoose, { Schema, Document, Types } from 'mongoose';
 
 export interface IUser extends Document {
   _id: Types.ObjectId;
-  username: string;
   email: string;
   password: string;
   firstName?: string;
@@ -20,7 +19,6 @@ export interface IUser extends Document {
 }
 
 const UserSchema = new Schema<IUser>({
-  username: { type: String, required: true, unique: true, min: [3, 'Username cannot be less than 3 characters'] },
   email: { type: String, required: true, unique: true, match: [/.+\@.+\..+/, 'Invalid email'] },
   password: { type: String, required: true, min: [6, 'Password cannot be less than 6 characters'] },
   firstName: { type: String },

@@ -3,6 +3,7 @@ import User, { IUser } from "@/app/models/User";
 import { LoginData, LoginResponse } from "@/types/user";
 import { comparePasswords, generateToken } from "@/utils/auth";
 import dbConnect from "@/lib/db";
+import { StringConstants } from "@/utils/constants";
 
 export async function POST(req: NextRequest) {
   try {
@@ -12,13 +13,13 @@ export async function POST(req: NextRequest) {
 
     const user: IUser | null = await User.findOne({ email });
     if (!user) {
-      return NextResponse.json({ error: 'User not found' }, { status: 404 });
+      return NextResponse.json({ error: StringConstants.USER_NOT_FOUND }, { status: 404 });
     }
 
     const isPasswordValid = await comparePasswords(password, user.password);
 
     if (!isPasswordValid) {
-      return NextResponse.json({ error: 'Invalid password' }, { status: 401 });
+      return NextResponse.json({ error: StringConstants.INVALID_PASSWORD }, { status: 401 });
     }
 
     const token = await generateToken({
@@ -30,7 +31,6 @@ export async function POST(req: NextRequest) {
       token,
       user: {
         id: user._id.toString(),
-        username: user.username,
         email: user.email,
         role: user.role,
         isEmailVerified: user.isEmailVerified

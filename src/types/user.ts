@@ -8,7 +8,6 @@ export interface RegisterResponse {
     message: string;
     user?: {
         id: string;
-        username: string;
         email: string;
         role: string;
         isEmailVerified: boolean;
@@ -25,7 +24,6 @@ export interface LoginResponse {
     token: string;
     user: {
         id: string;
-        username: string;
         email: string;
         role: string;
         isEmailVerified: boolean;

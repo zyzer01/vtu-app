@@ -3,7 +3,7 @@
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { LoginData, LoginResponse } from '@/types/user';
-import LoginForm from '@/components/auth/LoginForm';
+import LoginForm from '@/components/auth/login-form';
 
 export default function LoginPage() {
   const [error, setError] = useState<string>('');
@@ -41,3 +41,4 @@ export default function LoginPage() {
     </div>
   );
 }
+
