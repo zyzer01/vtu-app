@@ -1,7 +1,15 @@
 import { Separator } from "@/components/ui/separator"
 import { ProfileForm } from "@/components/settings/profile-form"
+import { headers } from "next/headers";
 
 export default function SettingsProfilePage() {
+  const headersList = headers();
+  const userId = headersList.get("x-user-id");
+
+  if (!userId) {
+    console.log("User not found");
+    return <div>User not found</div>;
+  }
   return (
     <div className="space-y-6">
       <div>
@@ -11,7 +19,7 @@ export default function SettingsProfilePage() {
         </p>
       </div>
       <Separator />
-      <ProfileForm />
+      <ProfileForm userId={userId} />
     </div>
   )
 }

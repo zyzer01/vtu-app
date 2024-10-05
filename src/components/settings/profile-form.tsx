@@ -14,6 +14,10 @@ import {
   FormMessage,
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
+import { useToast } from "@/hooks/use-toast";
+import { Toaster } from "../ui/toaster";
+import { useState } from "react";
+import { LoaderCircle } from "lucide-react";
 
 const profileFormSchema = z.object({
   firstName: z
@@ -23,7 +27,7 @@ const profileFormSchema = z.object({
     })
     .max(30, {
       message: "firstName must not be longer than 30 characters.",
-    }),
+    }).optional(),
   lastName: z
     .string()
     .min(2, {
@@ -31,37 +35,58 @@ const profileFormSchema = z.object({
     })
     .max(30, {
       message: "lastName must not be longer than 30 characters.",
-    }),
-  email: z
-    .string({
-      required_error: "Please select an email to display.",
-    })
-    .email(),
-  bio: z.string().max(160).min(4),
-  urls: z
-    .array(
-      z.object({
-        value: z.string().url({ message: "Please enter a valid URL." }),
-      })
-    )
-    .optional(),
+    }).optional()
 });
 
 type ProfileFormValues = z.infer<typeof profileFormSchema>;
 
-export function ProfileForm() {
+interface ProfileFormProps {
+  userId: string | null;
+}
+
+export function ProfileForm({ userId }: ProfileFormProps) {
+  const [isLoading, setIsLoading] = useState(false);
+  const { toast } = useToast();
   const form = useForm<ProfileFormValues>({
     resolver: zodResolver(profileFormSchema),
     mode: "onChange",
   });
 
-  function onSubmit(data: ProfileFormValues) {
-    console.log(data);
+  async function onSubmit(data: ProfileFormValues) {
+    setIsLoading(true);
+    try {
+      const response = await fetch(`/api/users/${userId}`, {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(data),
+      });
+
+      if (!response.ok) {
+        const errorText = await response.text();
+        throw new Error(errorText || "Failed to update profile");
+      }
+
+      const result = await response.json();
+      toast({
+        title: "Success",
+        description: "Your profile has been updated successfully",
+      });
+    } catch (error) {
+      console.error("Error updating profile:", error);
+      toast({
+        title: "Error",
+        description: error instanceof Error ? error.message : "Update failed",
+        variant: "destructive",
+      });
+    } finally {
+      setIsLoading(false);
+    }
   }
 
   return (
     <Form {...form}>
-      <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-8">
+      <Toaster />
+      <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
         <FormField
           control={form.control}
           name="firstName"
@@ -73,7 +98,7 @@ export function ProfileForm() {
               </FormControl>
               <FormDescription>
                 This is your public display name. It can be your real name or a
-                pseudonym. You can only change this once every 30 days.
+                pseudonym.
               </FormDescription>
               <FormMessage />
             </FormItem>
@@ -90,13 +115,18 @@ export function ProfileForm() {
               </FormControl>
               <FormDescription>
                 This is your public display name. It can be your real name or a
-                pseudonym. You can only change this once every 30 days.
+                pseudonym.
               </FormDescription>
               <FormMessage />
             </FormItem>
           )}
         />
-        <Button type="submit">Update profile</Button>
+        <Button disabled={isLoading} type="submit">
+            {isLoading && (
+              <LoaderCircle className="mr-2 h-4 w-4 animate-spin" />
+            )}
+            Update profile
+          </Button>
       </form>
     </Form>
   );

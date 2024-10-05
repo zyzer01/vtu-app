@@ -1,10 +1,10 @@
-"use client"
+"use client";
 
-import { zodResolver } from "@hookform/resolvers/zod"
-import { useForm } from "react-hook-form"
-import { z } from "zod"
-
-import { Button } from "@/components/ui/button"
+import { useState, useEffect } from "react";
+import { useForm } from "react-hook-form";
+import { z } from "zod";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { Button } from "@/components/ui/button";
 import {
   Form,
   FormControl,
@@ -13,39 +13,97 @@ import {
   FormItem,
   FormLabel,
   FormMessage,
-} from "@/components/ui/form"
-import { Input } from "@/components/ui/input"
+} from "@/components/ui/form";
+import { useToast } from "@/hooks/use-toast";
+import { Toaster } from "../ui/toaster";
+import { Input } from "../ui/input";
+import { LoaderCircle } from "lucide-react";
 
-
+// Validation schema
 const accountFormSchema = z.object({
-    email: z
-    .string({
-      required_error: "Please select an email to display.",
-    })
-    .email(),
-})
+  email: z.string().email({ message: "Invalid email address" }),
+});
 
-type AccountFormValues = z.infer<typeof accountFormSchema>
+type AccountFormValues = z.infer<typeof accountFormSchema>;
 
-// This can come from your database or API.
-const defaultValues: Partial<AccountFormValues> = {
-  email: "davidicfola@gmail.com",
+interface AccountFormProps {
+  userId: string | null;
 }
 
-export function AccountForm() {
+export function AccountForm({ userId }: AccountFormProps) {
+  const [isLoading, setIsLoading] = useState(false);
+  const [userEmail, setUserEmail] = useState("");
+  const { toast } = useToast();
+
   const form = useForm<AccountFormValues>({
     resolver: zodResolver(accountFormSchema),
-    defaultValues,
-  })
+    defaultValues: { email: userEmail },
+  });
 
-  function onSubmit(data: AccountFormValues) {
-    console.log(data)
-  }
+  useEffect(() => {
+    const fetchUser = async () => {
+      if (!userId) return;
+
+      try {
+        const response = await fetch(`/api/users/${userId}`);
+
+        if (!response.ok) {
+          const errorText = await response.text();
+          throw new Error(errorText || "Failed to fetch user");
+        }
+
+        const result = await response.json();
+        setUserEmail(result.user.email);
+        form.setValue("email", result.user.email);
+      } catch (error) {
+        console.error("Error fetching user:", error);
+        toast({
+          title: "Error",
+          description: error instanceof Error ? error.message : "Failed to fetch user",
+          variant: "destructive",
+        });
+      }
+    };
+
+    fetchUser();
+  }, [userId, toast, form]);
+
+  const onSubmit = async (data: AccountFormValues) => {
+    setIsLoading(true);
+    try {
+      const response = await fetch(`/api/users/${userId}`, {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(data),
+      });
+
+      if (!response.ok) {
+        const errorText = await response.text();
+        throw new Error(errorText || "Failed to update account");
+      }
+
+      const result = await response.json();
+      toast({
+        title: "Success",
+        description: "Your account has been updated successfully",
+      });
+    } catch (error) {
+      console.error("Error updating account:", error);
+      toast({
+        title: "Error",
+        description: error instanceof Error ? error.message : "Update failed",
+        variant: "destructive",
+      });
+    } finally {
+      setIsLoading(false);
+    }
+  };
 
   return (
     <Form {...form}>
+      <Toaster />
       <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-8">
-      <FormField
+        <FormField
           control={form.control}
           name="email"
           render={({ field }) => (
@@ -54,15 +112,18 @@ export function AccountForm() {
               <FormControl>
                 <Input placeholder="Email" {...field} />
               </FormControl>
-              <FormDescription>
-                Enter a new email address
-              </FormDescription>
+              <FormDescription>Enter a new email address</FormDescription>
               <FormMessage />
             </FormItem>
           )}
         />
-        <Button type="submit">Update account</Button>
+        <Button disabled={isLoading} type="submit">
+            {isLoading && (
+              <LoaderCircle className="mr-2 h-4 w-4 animate-spin" />
+            )}
+            Update account
+          </Button>
       </form>
     </Form>
-  )
+  );
 }
