@@ -22,6 +22,7 @@ export enum StringConstants {
     REGISTRATION_SUCCESS = "User registered successfully",
     SIGNUP_SUCCESSFUL = "Confirmation code sent to email.",
     USER_NOT_FOUND = "User not found",
+    VERIFICATION_CODE_SENT = "Verification code sent",
     WALLET_NOT_FOUND = "Wallet not found",
   }
   

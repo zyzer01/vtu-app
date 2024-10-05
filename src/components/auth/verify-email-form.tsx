@@ -51,7 +51,7 @@ export function VerifyEmailForm() {
 
       const responseData = await response.json();
 
-      if (response.ok && responseData.user) {
+      if (response.ok) {
         toast({
           title: "Email Verified Successfully",
           description: "Your email has been verified.",
@@ -80,7 +80,7 @@ export function VerifyEmailForm() {
 
   return (
     <div className="flex items-center justify-center">
-      <div className="w-full max-w-md space-y-8 rounded-lg shadow-md">
+      <div className="w-full max-w-md rounded-lg shadow-md">
         <Form {...form}>
           <Toaster />
           <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
