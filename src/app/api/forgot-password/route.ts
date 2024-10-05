@@ -24,14 +24,16 @@ export async function POST(req: NextRequest) {
 
         await user.save();
 
+        const resetLink = `${process.env.NEXT_PUBLIC_APP_URL}/auth/reset-password?token=${resetToken}`;
+
         await sendEmail({
             to: user.email,
             subject: 'Reset your password',
             template: 'forgot-password',
-            params: { username: user.firstName, code: resetToken },
+            params: { username: user.firstName, resetLink },
         });
 
-        return NextResponse.json({ message: StringConstants.FORGOT_PASSWORD }, { status: 200 });
+        return NextResponse.json({ message: StringConstants.PASSWORD_RESET_LINK_SENT }, { status: 200 });
     } catch (error) {
         console.error('Forgot password error:', error);
         return NextResponse.json({ error: 'An unexpected error occurred' }, { status: 500 });

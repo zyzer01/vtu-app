@@ -56,7 +56,7 @@ export function VerifyEmailForm() {
           title: "Email Verified Successfully",
           description: "Your email has been verified.",
         });
-        router.push("/login");
+        router.push("/auth/login");
       } else {
         throw new Error(
           responseData.error ||

@@ -1,3 +1,4 @@
+'use client'
 import {
     Avatar,
     AvatarFallback,
@@ -14,6 +15,7 @@ import {
     DropdownMenuShortcut,
     DropdownMenuTrigger,
   } from "@/components/ui/dropdown-menu"
+import { useRouter } from "next/navigation";
 
   interface UserNavProps {
     firstName: string;
@@ -29,6 +31,28 @@ import {
   
   export function UserNav({firstName, lastName, email, username}: UserNavProps) {
     const initials = getInitials(firstName, lastName);
+
+    const router = useRouter();
+
+    const handleLogout = async () => {
+      try {
+        const response = await fetch('/api/logout', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+        });
+  
+        if (response.ok) {
+          router.push('/auth/login');
+        } else {
+          console.error('Logout failed');
+        }
+      } catch (error) {
+        console.error('Error during logout:', error);
+      }
+    };
+
     return (
       <DropdownMenu>
         <DropdownMenuTrigger asChild>
@@ -65,7 +89,7 @@ import {
             <DropdownMenuItem>New Team</DropdownMenuItem>
           </DropdownMenuGroup>
           <DropdownMenuSeparator />
-          <DropdownMenuItem>
+          <DropdownMenuItem onClick={handleLogout}>
             Log out
             <DropdownMenuShortcut>⇧⌘Q</DropdownMenuShortcut>
           </DropdownMenuItem>

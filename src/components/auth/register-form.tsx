@@ -35,7 +35,6 @@ interface RegisterResponse {
   message: string;
   user?: {
     id: string;
-    username: string;
     email: string;
     role: string;
     isEmailVerified: boolean;
@@ -67,7 +66,7 @@ export function RegisterForm() {
           title: "Registration Successful",
           description: "Please check your email to verify your account.",
         });
-        router.push('/email/verify');
+        router.push('/auth/verify-email');
       } else {
         throw new Error(responseData.error || "An unknown error occurred during registration");
       }

@@ -51,7 +51,7 @@ export function LoginForm() {
       if (response.ok && responseData.user) {
         toast({
           title: "Login Successful",
-          description: "Login was successful",
+          description: "Redirecting you to your dashboard",
         });
         router.push("/dashboard");
       } else {
@@ -107,7 +107,7 @@ export function LoginForm() {
           />
           <p className="text-left text-sm text-muted-foreground pb-2">
             <Link
-              href="/terms"
+              href="/auth/forgot-password"
               className="underline underline-offset-4 hover:text-primary"
             >
               Forgot password?
