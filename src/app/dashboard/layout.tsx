@@ -1,7 +1,8 @@
-export default function DashboardLayout({
-  children,
-}: {
+interface DashboardLayoutProps {
   children: React.ReactNode;
-}) {
-  return <section>{children}</section>;
+}
+export default async function DashboardLayout({
+  children,
+}: DashboardLayoutProps) {
+  return <>{ children }</>;
 }

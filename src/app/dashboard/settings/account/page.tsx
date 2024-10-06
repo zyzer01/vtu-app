@@ -1,8 +1,9 @@
 import { Separator } from "@/components/ui/separator";
 import { AccountForm } from "@/components/settings/account-form";
 import { headers } from "next/headers";
+import User from "@/app/models/User";
 
-export default function SettingsAccountPage() {
+export default async function SettingsAccountPage() {
   const headersList = headers();
   const userId = headersList.get("x-user-id");
 
@@ -11,6 +12,7 @@ export default function SettingsAccountPage() {
     return <div>User not found</div>;
   }
 
+  const user = await User.findById(userId);
   return (
     <div className="space-y-6">
       <div>
@@ -20,7 +22,7 @@ export default function SettingsAccountPage() {
         </p>
       </div>
       <Separator />
-      <AccountForm userId={userId} />
+      <AccountForm id={user._id} email={user.email} />
     </div>
   );
 }

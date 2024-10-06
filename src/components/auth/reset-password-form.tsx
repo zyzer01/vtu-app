@@ -5,7 +5,7 @@ import { useRouter, useSearchParams } from "next/navigation";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
-import { LoaderCircle } from "lucide-react";
+import { Eye, EyeOff, LoaderCircle } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -23,7 +23,9 @@ import { Toaster } from "../ui/toaster";
 const resetPasswordSchema = z
   .object({
     password: z.string().min(8, "Password must be at least 8 characters"),
-    passwordConfirmation: z.string().min(8, "Password must be at least 8 characters"),
+    passwordConfirmation: z
+      .string()
+      .min(8, "Password must be at least 8 characters"),
   })
   .refine((data) => data.password === data.passwordConfirmation, {
     message: "Passwords do not match",
@@ -42,15 +44,22 @@ export function ResetPasswordForm() {
     resolver: zodResolver(resetPasswordSchema),
   });
 
+  const [showPassword, setShowPassword] = useState(false);
+
+  const togglePasswordVisibility = () => {
+    setShowPassword(!showPassword);
+  };
+
   useEffect(() => {
-    const tokenFromUrl = searchParams.get('token');
+    const tokenFromUrl = searchParams.get("token");
     if (!tokenFromUrl) {
       toast({
         title: "Invalid Reset Link",
-        description: "Token not found, the password reset link is invalid or has expired.",
+        description:
+          "Token not found, the password reset link is invalid or has expired.",
         variant: "destructive",
       });
-      router.push('/auth/forgot-password');
+      router.push("/auth/forgot-password");
     } else {
       setToken(tokenFromUrl);
     }
@@ -77,7 +86,8 @@ export function ResetPasswordForm() {
         router.push("/auth/login");
       } else {
         throw new Error(
-          responseData.error || "An unknown error occurred during password reset"
+          responseData.error ||
+            "An unknown error occurred during password reset"
         );
       }
     } catch (error) {
@@ -111,7 +121,26 @@ export function ResetPasswordForm() {
               <FormItem>
                 <FormLabel>New Password</FormLabel>
                 <FormControl>
-                  <Input type="password" placeholder="New Password" {...field} />
+                  <div className="relative">
+                    <Input
+                      placeholder="New Password"
+                      type={showPassword ? "text" : "password"}
+                      {...field}
+                    />
+                    <Button
+                      type="button"
+                      variant="ghost"
+                      size="sm"
+                      className="absolute right-0 top-0 h-full px-3 py-2 hover:bg-transparent"
+                      onClick={togglePasswordVisibility}
+                    >
+                      {showPassword ? (
+                        <EyeOff className="h-4 w-4" />
+                      ) : (
+                        <Eye className="h-4 w-4" />
+                      )}
+                    </Button>
+                  </div>
                 </FormControl>
                 <FormMessage />
               </FormItem>
@@ -124,7 +153,26 @@ export function ResetPasswordForm() {
               <FormItem>
                 <FormLabel>Confirm New Password</FormLabel>
                 <FormControl>
-                  <Input type="password" placeholder="Confirm New Password" {...field} />
+                  <div className="relative">
+                    <Input
+                      placeholder="Confirm New Password"
+                      type={showPassword ? "text" : "password"}
+                      {...field}
+                    />
+                    <Button
+                      type="button"
+                      variant="ghost"
+                      size="sm"
+                      className="absolute right-0 top-0 h-full px-3 py-2 hover:bg-transparent"
+                      onClick={togglePasswordVisibility}
+                    >
+                      {showPassword ? (
+                        <EyeOff className="h-4 w-4" />
+                      ) : (
+                        <Eye className="h-4 w-4" />
+                      )}
+                    </Button>
+                  </div>
                 </FormControl>
                 <FormMessage />
               </FormItem>

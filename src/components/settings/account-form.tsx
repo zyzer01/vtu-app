@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -27,51 +27,24 @@ const accountFormSchema = z.object({
 type AccountFormValues = z.infer<typeof accountFormSchema>;
 
 interface AccountFormProps {
-  userId: string | null;
+  id: string;
+  email: string;
 }
 
-export function AccountForm({ userId }: AccountFormProps) {
+export function AccountForm({ email, id }: AccountFormProps) {
   const [isLoading, setIsLoading] = useState(false);
-  const [userEmail, setUserEmail] = useState("");
   const { toast } = useToast();
 
   const form = useForm<AccountFormValues>({
     resolver: zodResolver(accountFormSchema),
-    defaultValues: { email: userEmail },
+    defaultValues: { email: email },
   });
 
-  useEffect(() => {
-    const fetchUser = async () => {
-      if (!userId) return;
-
-      try {
-        const response = await fetch(`/api/users/${userId}`);
-
-        if (!response.ok) {
-          const errorText = await response.text();
-          throw new Error(errorText || "Failed to fetch user");
-        }
-
-        const result = await response.json();
-        setUserEmail(result.user.email);
-        form.setValue("email", result.user.email);
-      } catch (error) {
-        console.error("Error fetching user:", error);
-        toast({
-          title: "Error",
-          description: error instanceof Error ? error.message : "Failed to fetch user",
-          variant: "destructive",
-        });
-      }
-    };
-
-    fetchUser();
-  }, [userId, toast, form]);
 
   const onSubmit = async (data: AccountFormValues) => {
     setIsLoading(true);
     try {
-      const response = await fetch(`/api/users/${userId}`, {
+      const response = await fetch(`/api/users/${id}`, {
         method: "PUT",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(data),
@@ -82,7 +55,7 @@ export function AccountForm({ userId }: AccountFormProps) {
         throw new Error(errorText || "Failed to update account");
       }
 
-      const result = await response.json();
+      await response.json();
       toast({
         title: "Success",
         description: "Your account has been updated successfully",

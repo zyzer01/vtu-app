@@ -22,7 +22,7 @@ const AuthLayout = ({children}: AuthLayoutProps) => {
        <Link
           href={linkHref}
           className={cn(
-            buttonVariants({ variant: "ghost" }),
+            buttonVariants({ variant: "link" }),
             "absolute right-4 top-4 md:right-8 md:top-8 hidden md:block"
           )}
         >

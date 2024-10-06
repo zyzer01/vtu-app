@@ -1,7 +1,6 @@
 import { headers } from "next/headers";
 import { Metadata } from "next";
 import Image from "next/image";
-
 import { Button } from "@/components/ui/button";
 import {
   Card,
@@ -17,17 +16,27 @@ import { RecentSales } from "@/components/dashboard/recent-sales";
 import { Search } from "@/components/dashboard/search";
 import { UserNav } from "@/components/dashboard/user-nav";
 import ThemeSwitcher from "@/components/ThemeSwitcher";
+import User from "../models/User";
+import dbConnect from "@/lib/db";
 
 export const metadata: Metadata = {
   title: "Dashboard",
   description: "Example dashboard app built using the components.",
 };
 
-export default function DashboardPage() {
+export default async function DashboardPage() {
+  dbConnect();
+
   const headersList = headers();
-  console.log(headersList);
-  // const userId = headersList.get('x-user-id');
-  // const userRole = headersList.get('x-user-role');
+  const userId = headersList.get("x-user-id");
+
+  if (!userId) {
+    console.log("User not found");
+    return <div>User not found</div>;
+  }
+
+  const user = await User.findById(userId);
+
   return (
     <>
       <div className="md:hidden">
@@ -54,10 +63,9 @@ export default function DashboardPage() {
               <Search />
               <ThemeSwitcher />
               <UserNav
-                firstName="John"
-                lastName="Doe"
-                email="john.doe@example.com"
-                username="johndoe"
+                firstName={user.firstName}
+                lastName={user.lastName}
+                email={user.email}
               />
             </div>
           </div>

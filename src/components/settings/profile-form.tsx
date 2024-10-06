@@ -50,6 +50,10 @@ export function ProfileForm({ userId }: ProfileFormProps) {
   const form = useForm<ProfileFormValues>({
     resolver: zodResolver(profileFormSchema),
     mode: "onChange",
+    defaultValues: {
+      firstName: "",
+      lastName: "",
+    }
   });
 
   async function onSubmit(data: ProfileFormValues) {
@@ -66,11 +70,13 @@ export function ProfileForm({ userId }: ProfileFormProps) {
         throw new Error(errorText || "Failed to update profile");
       }
 
-      const result = await response.json();
+      await response.json();
+      form.reset();
       toast({
         title: "Success",
         description: "Your profile has been updated successfully",
       });
+
     } catch (error) {
       console.error("Error updating profile:", error);
       toast({

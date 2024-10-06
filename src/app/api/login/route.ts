@@ -16,7 +16,7 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: StringConstants.USER_NOT_FOUND }, { status: 404 });
     }
 
-    const isPasswordValid = await comparePasswords(password, user.password);
+    const isPasswordValid = await comparePasswords(password, user.password || '');
 
     if (!isPasswordValid) {
       return NextResponse.json({ error: StringConstants.INVALID_PASSWORD }, { status: 401 });

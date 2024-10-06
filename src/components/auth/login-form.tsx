@@ -6,7 +6,7 @@ import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
 import Link from "next/link";
-import { Github, LoaderCircle } from "lucide-react";
+import { Eye, EyeOff, LoaderCircle } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -21,6 +21,7 @@ import {
 import { useToast } from "@/hooks/use-toast";
 import { Toaster } from "../ui/toaster";
 import { LoginResponse } from "@/types/user";
+import { signIn } from "next-auth/react";
 
 const loginFormSchema = z.object({
   email: z.string().email("Please enter a valid email address"),
@@ -36,6 +37,12 @@ export function LoginForm() {
   const form = useForm<LoginFormValues>({
     resolver: zodResolver(loginFormSchema),
   });
+
+  const [showPassword, setShowPassword] = useState(false);
+
+  const togglePasswordVisibility = () => {
+    setShowPassword(!showPassword);
+  };
 
   const onSubmit = async (data: LoginFormValues) => {
     setIsLoading(true);
@@ -74,6 +81,40 @@ export function LoginForm() {
     }
   };
 
+  
+  const handleGoogleSignIn = async () => {
+    setIsLoading(true);
+    try {
+      const result = await signIn("google", { callbackUrl: "/dashboard", redirect: false });
+      console.log("Google sign-in result:", result);
+
+      if (result?.error) {
+        throw new Error(result.error);
+      }
+      
+      if (result?.url) {
+        console.log("Redirecting to:", result.url);
+        router.push(result.url);
+      } else {
+        console.log("No URL returned from signIn");
+        // Fallback redirection
+        router.push("/dashboard");
+      }
+    } catch (error) {
+      console.error("Error during Google sign-in:", error);
+      toast({
+        title: "Google Sign-in Failed",
+        description:
+          error instanceof Error
+            ? error.message
+            : "An unexpected error occurred. Please try again.",
+        variant: "destructive",
+      });
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
   return (
     <div className="grid gap-6">
       <Toaster />
@@ -99,7 +140,26 @@ export function LoginForm() {
               <FormItem>
                 <FormLabel>Password</FormLabel>
                 <FormControl>
-                  <Input placeholder="Password" type="password" {...field} />
+                  <div className="relative">
+                    <Input
+                      placeholder="Password"
+                      type={showPassword ? "text" : "password"}
+                      {...field}
+                    />
+                    <Button
+                      type="button"
+                      variant="ghost"
+                      size="sm"
+                      className="absolute right-0 top-0 h-full px-3 py-2 hover:bg-transparent"
+                      onClick={togglePasswordVisibility}
+                    >
+                      {showPassword ? (
+                        <EyeOff className="h-4 w-4" />
+                      ) : (
+                        <Eye className="h-4 w-4" />
+                      )}
+                    </Button>
+                  </div>
                 </FormControl>
                 <FormMessage />
               </FormItem>
@@ -133,13 +193,22 @@ export function LoginForm() {
         </div>
       </div>
 
-      <Button variant="outline" type="button" disabled={isLoading}>
+      <Button variant="outline" type="button" disabled={isLoading} onClick={handleGoogleSignIn}>
         {isLoading ? (
           <LoaderCircle className="mr-2 h-4 w-4 animate-spin" />
         ) : (
-          <Github className="mr-2 h-4 w-4" />
+          <svg
+            xmlns="http://www.w3.org/2000/svg"
+            width="14"
+            height="14"
+            fill="currentColor"
+            className="bi bi-google mr-1"
+            viewBox="0 0 16 16"
+          >
+            <path d="M15.545 6.558a9.4 9.4 0 0 1 .139 1.626c0 2.434-.87 4.492-2.384 5.885h.002C11.978 15.292 10.158 16 8 16A8 8 0 1 1 8 0a7.7 7.7 0 0 1 5.352 2.082l-2.284 2.284A4.35 4.35 0 0 0 8 3.166c-2.087 0-3.86 1.408-4.492 3.304a4.8 4.8 0 0 0 0 3.063h.003c.635 1.893 2.405 3.301 4.492 3.301 1.078 0 2.004-.276 2.722-.764h-.003a3.7 3.7 0 0 0 1.599-2.431H8v-3.08z" />
+          </svg>
         )}{" "}
-        GitHub
+        Google
       </Button>
     </div>
   );
