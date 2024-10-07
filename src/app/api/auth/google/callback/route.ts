@@ -55,7 +55,7 @@ export async function GET(request: Request) {
         });
       } catch (error) {
         if (error instanceof MongoServerError && error.code === 11000) {
-          return NextResponse.redirect('/auth/error?error=EmailAlreadyRegistered');
+          return NextResponse.redirect(`${baseUrl}/auth/error?error=EmailAlreadyRegistered`);
         }
         throw error; // re-throw the error if it's not a duplicate key error
       }

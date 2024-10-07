@@ -20,7 +20,7 @@ const ErrorPage = () => {
   };
 
   return (
-    <div className="flex items-center justify-center h-screen">
+    <div className="flex items-center justify-center">
       <div className="bg-background p-6 rounded-lg shadow-lg text-center">
         <h1 className="text-2xl font-bold mb-4">Error</h1>
         <p className="text-destructive">{getErrorMessage(error)}</p>
