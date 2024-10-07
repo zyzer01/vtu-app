@@ -37,7 +37,6 @@ export async function POST(req: NextRequest) {
             message: StringConstants.REGISTRATION_SUCCESS,
             user: {
                 id: newUser._id,
-                username: newUser.username,
                 email: newUser.email,
                 role: newUser.role,
                 isEmailVerified: newUser.isEmailVerified

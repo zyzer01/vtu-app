@@ -1,6 +1,5 @@
 import { headers } from "next/headers";
 import { Metadata } from "next";
-import Image from "next/image";
 import { Button } from "@/components/ui/button";
 import {
   Card,
@@ -11,13 +10,15 @@ import {
 } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { MainNav } from "@/components/dashboard/main-nav";
-import { Overview } from "@/components/dashboard/overview";
+// import { Overview } from "@/components/dashboard/overview";
 import { RecentSales } from "@/components/dashboard/recent-sales";
 import { Search } from "@/components/dashboard/search";
 import { UserNav } from "@/components/dashboard/user-nav";
 import ThemeSwitcher from "@/components/ThemeSwitcher";
 import User from "../models/User";
 import dbConnect from "@/lib/db";
+// import PhoneNumberExtractor from "@/components/dashboard/phone-number-extractor";
+import PhoneExtractor from "@/components/dashboard/phone-extractor";
 
 export const metadata: Metadata = {
   title: "Dashboard",
@@ -25,7 +26,7 @@ export const metadata: Metadata = {
 };
 
 export default async function DashboardPage() {
-  dbConnect();
+  await dbConnect();
 
   const headersList = headers();
   const userId = headersList.get("x-user-id");
@@ -39,23 +40,7 @@ export default async function DashboardPage() {
 
   return (
     <>
-      <div className="md:hidden">
-        <Image
-          src="/examples/dashboard-light.png"
-          width={1280}
-          height={866}
-          alt="Dashboard"
-          className="block dark:hidden"
-        />
-        <Image
-          src="/examples/dashboard-dark.png"
-          width={1280}
-          height={866}
-          alt="Dashboard"
-          className="hidden dark:block"
-        />
-      </div>
-      <div className="hidden flex-col md:flex">
+      <div className="flex-col flex">
         <div className="border-b">
           <div className="flex h-16 items-center px-4">
             <MainNav className="mx-6" />
@@ -66,6 +51,7 @@ export default async function DashboardPage() {
                 firstName={user.firstName}
                 lastName={user.lastName}
                 email={user.email}
+                profilePicture={user.profilePicture}
               />
             </div>
           </div>
@@ -92,7 +78,7 @@ export default async function DashboardPage() {
             </TabsList>
             <TabsContent value="overview" className="space-y-4">
               <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
-                <Card>
+                {/* <Card>
                   <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
                     <CardTitle className="text-sm font-medium">
                       Total Revenue
@@ -192,15 +178,16 @@ export default async function DashboardPage() {
                       +201 since last hour
                     </p>
                   </CardContent>
-                </Card>
-              </div>
+                </Card> */}
+              </div> 
               <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-7">
                 <Card className="col-span-4">
                   <CardHeader>
-                    <CardTitle>Overview</CardTitle>
+                    <CardTitle>Enter Phone Number</CardTitle>
                   </CardHeader>
                   <CardContent className="pl-2">
-                    <Overview />
+                    <PhoneExtractor />
+                    {/* <PhoneNumberExtractor /> */}
                   </CardContent>
                 </Card>
                 <Card className="col-span-3">

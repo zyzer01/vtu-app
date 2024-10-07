@@ -2,8 +2,11 @@ import { Separator } from "@/components/ui/separator";
 import { AccountForm } from "@/components/settings/account-form";
 import { headers } from "next/headers";
 import User from "@/app/models/User";
+import dbConnect from "@/lib/db";
 
 export default async function SettingsAccountPage() {
+
+  await dbConnect()
   const headersList = headers();
   const userId = headersList.get("x-user-id");
 

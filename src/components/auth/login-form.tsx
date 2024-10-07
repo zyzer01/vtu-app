@@ -21,7 +21,6 @@ import {
 import { useToast } from "@/hooks/use-toast";
 import { Toaster } from "../ui/toaster";
 import { LoginResponse } from "@/types/user";
-import { signIn } from "next-auth/react";
 
 const loginFormSchema = z.object({
   email: z.string().email("Please enter a valid email address"),
@@ -42,6 +41,11 @@ export function LoginForm() {
 
   const togglePasswordVisibility = () => {
     setShowPassword(!showPassword);
+  };
+
+  const handleGoogleSignIn = () => {
+    setIsLoading(true); 
+    window.location.href = '/api/auth/google';
   };
 
   const onSubmit = async (data: LoginFormValues) => {
@@ -70,40 +74,6 @@ export function LoginForm() {
       console.error("Error during registration:", error);
       toast({
         title: "Login Failed",
-        description:
-          error instanceof Error
-            ? error.message
-            : "An unexpected error occurred. Please try again.",
-        variant: "destructive",
-      });
-    } finally {
-      setIsLoading(false);
-    }
-  };
-
-  
-  const handleGoogleSignIn = async () => {
-    setIsLoading(true);
-    try {
-      const result = await signIn("google", { callbackUrl: "/dashboard", redirect: false });
-      console.log("Google sign-in result:", result);
-
-      if (result?.error) {
-        throw new Error(result.error);
-      }
-      
-      if (result?.url) {
-        console.log("Redirecting to:", result.url);
-        router.push(result.url);
-      } else {
-        console.log("No URL returned from signIn");
-        // Fallback redirection
-        router.push("/dashboard");
-      }
-    } catch (error) {
-      console.error("Error during Google sign-in:", error);
-      toast({
-        title: "Google Sign-in Failed",
         description:
           error instanceof Error
             ? error.message
