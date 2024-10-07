@@ -3,7 +3,7 @@ import mongoose, { Schema, Document, Types } from 'mongoose';
 export interface IUser extends Document {
   _id: Types.ObjectId;
   email: string;
-  password?: string;
+  password: string;
   firstName?: string;
   lastName?: string;
   phone_number?: string;
@@ -11,6 +11,8 @@ export interface IUser extends Document {
   is_active: boolean;
   isEmailVerified: boolean,
   oauthProvider?: string;
+  googleId?: string;
+  profilePicture?: string;
   emailVerificationCode: number | null,
   emailVerificationCodeExpiry: Date | null,
   resetPasswordToken: string | null,
@@ -29,6 +31,8 @@ const UserSchema = new Schema<IUser>({
   is_active: { type: Boolean, default: true },
   isEmailVerified: { type: Boolean, default: false },
   oauthProvider: { type: String, required: false },
+  googleId: { type: String, unique: true, sparse: true },
+  profilePicture: { type: String },
   emailVerificationCode: { type: Number },
   emailVerificationCodeExpiry: { type: Date },
   resetPasswordToken: { type: String },

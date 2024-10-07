@@ -1,7 +1,8 @@
 import { saltRounds, verificationCodeExpiry } from "@/config";
 import crypto from 'crypto';
 import bcrypt from 'bcryptjs';
-import { SignJWT, jwtVerify } from 'jose';
+import { jwtVerify, SignJWT } from 'jose';
+// import jwt from 'jsonwebtoken';
 
 const JWT_SECRET = new TextEncoder().encode(process.env.NEXT_PUBLIC_JWT_SECRET);
 
@@ -26,6 +27,7 @@ export async function generateToken(payload: any): Promise<string> {
         .setExpirationTime('1h')
         .sign(JWT_SECRET);
 }
+
 export const generateOTP = (): number => {
     return Math.floor(100000 + Math.random() * 900000);
 };

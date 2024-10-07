@@ -1,59 +1,51 @@
-/* eslint-disable @typescript-eslint/no-explicit-any */
 import { NextResponse } from 'next/server';
 import type { NextRequest } from 'next/server';
 import { verifyToken } from './utils/auth';
-import { getToken } from 'next-auth/jwt';
 
 export async function middleware(request: NextRequest) {
+  const token = request.cookies.get('token')?.value;
   const authPaths = ['/dashboard', '/admin'];
   const isAuthPath = authPaths.some(path => request.nextUrl.pathname.startsWith(path));
+  const isGoogleAuthCallback = request.nextUrl.pathname === '/api/auth/google/callback';
+
+  // Allow Google OAuth callback to pass through
+  if (isGoogleAuthCallback) {
+    return NextResponse.next();
+  }
 
   if (isAuthPath) {
-    // Check for custom token
-    const customToken = request.cookies.get('token')?.value;
-    
-    // Check for NextAuth session
-    const nextAuthToken = await getToken({ req: request as any });
-
-    if (!customToken && !nextAuthToken) {
+    if (!token) {
+      console.log('No token found, redirecting to login');
       return NextResponse.redirect(new URL('/auth/login', request.url));
     }
 
-    let userId: string | undefined;
-    let userRole: string | undefined;
-
-    if (customToken) {
-      try {
-        const decoded = await verifyToken(customToken);
-        userId = decoded.userId;
-        userRole = decoded.role;
-      } catch (error) {
-        console.error('Error verifying custom token:', error);
-        return NextResponse.redirect(new URL('/auth/login', request.url));
+    try {
+      
+      const decoded = await verifyToken(token);
+      console.log('Decoded Token:', decoded);
+      
+      if (request.nextUrl.pathname.startsWith('/admin') && decoded.role !== 'admin') {
+        return NextResponse.redirect(new URL('/dashboard', request.url));
       }
-    } else if (nextAuthToken) {
-      userId = nextAuthToken.sub; // NextAuth uses 'sub' for user ID
-      userRole = nextAuthToken.role as string;
+
+      const requestHeaders = new Headers(request.headers);
+      requestHeaders.set('x-user-id', decoded.userId);
+      requestHeaders.set('x-user-role', decoded.role);
+
+      return NextResponse.next({
+        request: {
+          headers: requestHeaders,
+        },
+      });
+    } catch (error) {
+      console.error('Token verification failed:', error);
+      return NextResponse.redirect(new URL('/auth/login', request.url));
     }
-
-    if (request.nextUrl.pathname.startsWith('/admin') && userRole !== 'admin') {
-      return NextResponse.redirect(new URL('/dashboard', request.url));
-    }
-
-    const requestHeaders = new Headers(request.headers);
-    if (userId) requestHeaders.set('x-user-id', userId);
-    if (userRole) requestHeaders.set('x-user-role', userRole);
-
-    return NextResponse.next({
-      request: {
-        headers: requestHeaders,
-      },
-    });
   }
 
   return NextResponse.next();
 }
 
 export const config = {
-  matcher: ['/dashboard/:path*', '/admin/:path*'],
+  matcher: ['/dashboard/:path*', '/admin/:path*', '/api/auth/:path*'],
 };
