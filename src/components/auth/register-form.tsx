@@ -54,6 +54,11 @@ export function RegisterForm() {
     setShowPassword(!showPassword);
   };
 
+  const handleGoogleSignIn = () => {
+    setIsLoading(true); 
+    window.location.href = '/api/auth/google';
+  };
+
   const onSubmit = async (data: RegisterFormValues) => {
     setIsLoading(true);
     try {
@@ -187,7 +192,7 @@ export function RegisterForm() {
         </div>
       </div>
 
-      <Button variant="outline" type="button" disabled={isLoading} onClick={() => window.location.href = '/api/auth/google'}>
+      <Button variant="outline" type="button" disabled={isLoading} onClick={handleGoogleSignIn}>
         {isLoading ? (
           <LoaderCircle className="mr-2 h-4 w-4 animate-spin" />
         ) : (
