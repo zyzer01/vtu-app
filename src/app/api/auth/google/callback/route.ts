@@ -3,12 +3,14 @@ import { OAuth2Client } from 'google-auth-library';
 import { generateToken } from '@/utils/auth';
 import User from '@/app/models/User';
 import dbConnect from '@/lib/db';
+import { MongoServerError } from 'mongodb';
 
 const client = new OAuth2Client(
   process.env.GOOGLE_CLIENT_ID,
   process.env.GOOGLE_CLIENT_SECRET,
   `${process.env.NEXTAUTH_URL}/api/auth/google/callback`
 );
+const baseUrl = process.env.NEXTAUTH_URL || 'http://localhost:3000';
 
 export async function GET(request: Request) {
   try {
@@ -19,7 +21,7 @@ export async function GET(request: Request) {
 
     if (!code) {
       console.error('No code received from Google');
-      return NextResponse.redirect('/auth/login?error=NoCode');
+      return NextResponse.redirect(`${baseUrl}/auth/error?error=NoCode`);
     }
 
     const { tokens } = await client.getToken(code);
@@ -35,19 +37,28 @@ export async function GET(request: Request) {
       throw new Error('No payload in ID token');
     }
 
-    const { email, sub: googleId, given_name, family_name } = payload;
+    const { email, sub: googleId, given_name, family_name, picture } = payload;
 
+    // let user = await User.findOne({ $or: [{ googleId }, { email }] });
     let user = await User.findOne({ googleId });
 
     if (!user) {
-      user = await User.create({
-        email,
-        googleId,
-        firstName: given_name,
-        lastName: family_name,
-        isEmailVerified: true,
-        role: 'user'
-      });
+      try {
+        user = await User.create({
+          email,
+          googleId,
+          firstName: given_name,
+          lastName: family_name,
+          isEmailVerified: true,
+          profilePicture: picture,
+          role: 'user',
+        });
+      } catch (error) {
+        if (error instanceof MongoServerError && error.code === 11000) {
+          return NextResponse.redirect('/auth/error?error=EmailAlreadyRegistered');
+        }
+        throw error; // re-throw the error if it's not a duplicate key error
+      }
     }
 
     const token = await generateToken({
@@ -55,7 +66,6 @@ export async function GET(request: Request) {
       role: user.role
     });
 
-    const baseUrl = process.env.NEXTAUTH_URL || 'http://localhost:3000';
     const response = NextResponse.redirect(`${baseUrl}/dashboard`);
     response.cookies.set('token', token, {
       httpOnly: true,
@@ -68,6 +78,6 @@ export async function GET(request: Request) {
     return response;
   } catch (error) {
     console.error('Google Auth Error:', error);
-    return NextResponse.redirect('/auth/login?error=GoogleAuthFailed');
+    return NextResponse.redirect(`${baseUrl}/auth/error?error=GoogleAuthFailed`);
   }
 }

@@ -17,15 +17,17 @@ interface UserNavProps {
   firstName: string;
   lastName: string;
   email: string;
+  profilePicture: string;
 }
 
 const getInitials = (firstName: string, lastName: string) => {
   return `${firstName?.charAt(0)}${lastName?.charAt(0)}`.toUpperCase();
 };
 
-export function UserNav({ firstName, lastName, email }: UserNavProps) {
+export function UserNav({ firstName, lastName, email, profilePicture }: UserNavProps) {
   const initials = getInitials(firstName, lastName);
 
+  console.log(profilePicture)
   const router = useRouter();
 
   const handleLogout = async () => {
@@ -53,7 +55,7 @@ export function UserNav({ firstName, lastName, email }: UserNavProps) {
       <DropdownMenuTrigger asChild>
         <Button variant="ghost" className="relative h-8 w-8 rounded-full">
           <Avatar className="h-8 w-8">
-            <AvatarImage src="/avatars/01.png" alt="@shadcn" />
+            <AvatarImage src={profilePicture} alt="@shadcn" />
             <AvatarFallback>{initials}</AvatarFallback>
           </Avatar>
         </Button>

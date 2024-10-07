@@ -51,6 +51,7 @@ export default async function DashboardPage() {
                 firstName={user.firstName}
                 lastName={user.lastName}
                 email={user.email}
+                profilePicture={user.profilePicture}
               />
             </div>
           </div>

@@ -2,7 +2,6 @@ import { saltRounds, verificationCodeExpiry } from "@/config";
 import crypto from 'crypto';
 import bcrypt from 'bcryptjs';
 import { jwtVerify, SignJWT } from 'jose';
-// import jwt from 'jsonwebtoken';
 
 const JWT_SECRET = new TextEncoder().encode(process.env.NEXT_PUBLIC_JWT_SECRET);
 
