@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import User from '@/app/models/User';
 import { sendEmail } from '@/app/mail/mail.service';
-import { StringConstants } from '@/utils/constants';
+import { StringConstants } from '@/lib/utils/constants';
 import dbConnect from '@/lib/db';
 
 export async function POST(req: NextRequest) {

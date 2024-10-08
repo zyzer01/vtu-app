@@ -3,9 +3,9 @@
 import { NextRequest, NextResponse } from 'next/server';
 import User from '@/app/models/User';
 import { sendEmail } from '@/app/mail/mail.service';
-import { StringConstants } from '@/utils/constants';
+import { StringConstants } from '@/lib/utils/constants';
 import dbConnect from '@/lib/db';
-import { calculateVerificationCodeExpiryTime, generateOTP } from '@/utils/auth';
+import { calculateVerificationCodeExpiryTime, generateOTP } from '@/lib/utils/auth';
 
 export async function POST(req: NextRequest) {
     await dbConnect();

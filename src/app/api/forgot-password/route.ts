@@ -1,9 +1,11 @@
 import { NextRequest, NextResponse } from 'next/server';
 import User from '@/app/models/User';
 import { sendEmail } from '@/app/mail/mail.service';
-import { StringConstants } from '@/utils/constants';
+import { StringConstants } from '@/lib/utils/constants';
 import dbConnect from '@/lib/db';
-import { calculateVerificationCodeExpiryTime, generateVerificationCode } from '@/utils/auth';
+import { calculateVerificationCodeExpiryTime, generateVerificationCode } from '@/lib/utils/auth';
+
+const FIVE_MINUTES_MS = 5 * 60 * 1000;
 
 export async function POST(req: NextRequest) {
     await dbConnect();
@@ -16,11 +18,21 @@ export async function POST(req: NextRequest) {
             return NextResponse.json({ error: StringConstants.USER_NOT_FOUND }, { status: 404 });
         }
 
-        const resetToken = generateVerificationCode();
-        const resetTokenExpiry = calculateVerificationCodeExpiryTime()
+        const now = new Date().getTime();
 
-        user.resetPasswordToken = resetToken
-        user.resetPasswordTokenExpiry = resetTokenExpiry
+        if (user.lastResetRequestTime && (now - user.lastResetRequestTime) < FIVE_MINUTES_MS) {
+            const waitTimeMinutes = Math.ceil((FIVE_MINUTES_MS - (now - user.lastResetRequestTime)) / 60000);
+            return NextResponse.json({ 
+                error: `Please wait for ${waitTimeMinutes} minute${waitTimeMinutes > 1 ? 's' : ''} before requesting a new link.` 
+            }, { status: 429 });
+        }
+
+        const resetToken = generateVerificationCode();
+        const resetTokenExpiry = calculateVerificationCodeExpiryTime();
+
+        user.resetPasswordToken = resetToken;
+        user.resetPasswordTokenExpiry = resetTokenExpiry;
+        user.lastResetRequestTime = now;
 
         await user.save();
 

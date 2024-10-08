@@ -1,9 +1,9 @@
 import { NextRequest, NextResponse } from 'next/server';
 import User from '@/app/models/User';
 import { sendEmail } from '@/app/mail/mail.service';
-import { StringConstants } from '@/utils/constants';
+import { StringConstants } from '@/lib/utils/constants';
 import dbConnect from '@/lib/db';
-import { hashPassword } from '@/utils/auth';
+import { comparePasswords, hashPassword } from '@/lib/utils/auth';
 
 export async function POST(req: NextRequest) {
     await dbConnect();
@@ -11,13 +11,17 @@ export async function POST(req: NextRequest) {
         const { token, newPassword } = await req.json();
 
         if (!token || !newPassword) {
-            return NextResponse.json({ error: 'Missing token or new password' }, { status: 400 });
+            return NextResponse.json({ error: StringConstants.MISSING_TOKEN_NEW_PASSWORD }, { status: 400 });
         }
 
         const user = await User.findOne({
             resetPasswordToken: token,
             resetPasswordTokenExpiry: { $gt: new Date() }
         });
+
+        if (await comparePasswords(newPassword, user.password)) {
+            return NextResponse.json({ error: StringConstants.PASSWORD_ALREADY_USED }, { status: 400 });
+        }
 
         if (!user) {
             const expiredUser = await User.findOne({ resetPasswordToken: token });

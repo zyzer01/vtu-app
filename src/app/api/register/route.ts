@@ -1,8 +1,8 @@
 import { sendEmail } from "@/app/mail/mail.service";
 import User, { IUser } from "@/app/models/User";
 import dbConnect from "@/lib/db";
-import { calculateVerificationCodeExpiryTime, generateOTP, hashPassword } from "@/utils/auth";
-import { StringConstants } from "@/utils/constants";
+import { calculateVerificationCodeExpiryTime, generateOTP, hashPassword } from "@/lib/utils/auth";
+import { StringConstants } from "@/lib/utils/constants";
 import { NextRequest, NextResponse } from "next/server";
 
 export async function POST(req: NextRequest) {

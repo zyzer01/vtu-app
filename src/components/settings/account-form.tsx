@@ -14,7 +14,7 @@ import {
   FormLabel,
   FormMessage,
 } from "@/components/ui/form";
-import { useToast } from "@/hooks/use-toast";
+import { useToast } from "@/lib/hooks/use-toast";
 import { Toaster } from "../ui/toaster";
 import { Input } from "../ui/input";
 import { LoaderCircle } from "lucide-react";

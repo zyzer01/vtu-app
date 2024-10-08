@@ -1,6 +1,6 @@
 import { NextResponse } from 'next/server';
 import { OAuth2Client } from 'google-auth-library';
-import { generateToken } from '@/utils/auth';
+import { generateToken } from '@/lib/utils/auth';
 import User from '@/app/models/User';
 import dbConnect from '@/lib/db';
 import { MongoServerError } from 'mongodb';

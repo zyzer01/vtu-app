@@ -2,7 +2,7 @@ import nodemailer from 'nodemailer';
 import handlebars from 'handlebars';
 import fs from 'fs/promises';
 import path from 'path';
-import { ISendMail } from '@/types/mail';
+import { ISendMail } from '@/lib/types/mail';
 
 const SMTP_HOST = process.env.NEXT_PUBLIC_SMTP_HOST;
 const SMTP_PORT = Number(process.env.NEXT_PUBLIC_SMTP_PORT) || 2525;

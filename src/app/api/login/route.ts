@@ -1,9 +1,9 @@
 import { NextRequest, NextResponse } from "next/server";
 import User, { IUser } from "@/app/models/User";
-import { LoginData, LoginResponse } from "@/types/user";
-import { comparePasswords, generateToken } from "@/utils/auth";
+import { LoginData, LoginResponse } from "@/lib/types/user";
+import { comparePasswords, generateToken } from "@/lib/utils/auth";
 import dbConnect from "@/lib/db";
-import { StringConstants } from "@/utils/constants";
+import { StringConstants } from "@/lib/utils/constants";
 
 export async function POST(req: NextRequest) {
   try {

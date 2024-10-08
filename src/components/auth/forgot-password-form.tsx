@@ -1,11 +1,8 @@
-'use client'
 import React, { useState } from "react";
-import { useRouter } from "next/navigation";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
 import { LoaderCircle } from "lucide-react";
-
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import {
@@ -16,9 +13,10 @@ import {
   FormLabel,
   FormMessage,
 } from "@/components/ui/form";
-import { useToast } from "@/hooks/use-toast";
+import { useToast } from "@/lib/hooks/use-toast";
 import { Toaster } from "../ui/toaster";
-import { useEmail } from "@/app/context/email";
+import CheckEmail from "./check-email";
+import AuthHeading from "./auth-heading";
 
 const forgotPasswordSchema = z.object({
   email: z.string().email("Please enter a valid email address"),
@@ -27,10 +25,10 @@ const forgotPasswordSchema = z.object({
 type ForgotPasswordValues = z.infer<typeof forgotPasswordSchema>;
 
 export function ForgotPasswordForm() {
-  const router = useRouter();
   const [isLoading, setIsLoading] = useState(false);
+  const [isEmailSent, setIsEmailSent] = useState(false); // State to toggle form
+  const [email, setEmail] = useState(""); // Store email for CheckEmail component
   const { toast } = useToast();
-  const { setEmail } = useEmail();
   const form = useForm<ForgotPasswordValues>({
     resolver: zodResolver(forgotPasswordSchema),
   });
@@ -52,14 +50,13 @@ export function ForgotPasswordForm() {
           description: "Please check your email for the password reset link",
         });
         setEmail(data.email);
-        router.push("/auth/check-email");
+        setIsEmailSent(true); // Switch to CheckEmail component
       } else {
         throw new Error(
           responseData.error || "An unknown error occurred during reset"
         );
       }
     } catch (error) {
-      console.error("Error during password reset request:", error);
       toast({
         title: "Password Reset Request Failed",
         description:
@@ -73,32 +70,41 @@ export function ForgotPasswordForm() {
     }
   };
 
-  return (
-    <div className="grid gap-6">
-      <Toaster />
-      <Form {...form}>
-        <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
-          <FormField
-            control={form.control}
-            name="email"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>Email</FormLabel>
-                <FormControl>
-                  <Input placeholder="Email" {...field} />
-                </FormControl>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
-          <Button disabled={isLoading} type="submit" className="w-full">
-            {isLoading && (
-              <LoaderCircle className="mr-2 h-4 w-4 animate-spin" />
-            )}
-            Send Reset Link
-          </Button>
-        </form>
-      </Form>
-    </div>
+  return isEmailSent ? (
+      <CheckEmail email={email} />
+  ) : (
+    <>
+      <AuthHeading
+        heading="Reset your password"
+        subheading="Enter your email and we'll send you a reset link"
+      />
+
+      <div className="grid gap-6">
+        <Toaster />
+        <Form {...form}>
+          <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
+            <FormField
+              control={form.control}
+              name="email"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Email</FormLabel>
+                  <FormControl>
+                    <Input placeholder="Email" {...field} />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+            <Button disabled={isLoading} type="submit" className="w-full">
+              {isLoading && (
+                <LoaderCircle className="mr-2 h-4 w-4 animate-spin" />
+              )}
+              Send Reset Link
+            </Button>
+          </form>
+        </Form>
+      </div>
+    </>
   );
 }

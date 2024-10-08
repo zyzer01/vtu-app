@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { StringConstants } from '@/utils/constants';
+import { StringConstants } from '@/lib/utils/constants';
 import User from '@/app/models/User';
 import dbConnect from '@/lib/db';
 

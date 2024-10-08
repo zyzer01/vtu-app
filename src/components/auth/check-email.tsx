@@ -1,16 +1,18 @@
 "use client";
 import React, { useState, useEffect } from "react";
-import { useToast } from "@/hooks/use-toast";
+import { useToast } from "@/lib/hooks/use-toast";
 import { Toaster } from "@/components/ui/toaster";
 import { Button } from "@/components/ui/button";
-import { useEmail } from "@/app/context/email";
 import { LoaderCircle } from "lucide-react";
+import AuthHeading from "./auth-heading";
 
-const CheckEmail = () => {
+interface CheckEmailProps {
+  email: string;
+}
+const CheckEmail: React.FC<CheckEmailProps> = ({ email }) => {
   const { toast } = useToast();
-  const [timeLeft, setTimeLeft] = useState(300); // 5 minutes in seconds
+  const [timeLeft, setTimeLeft] = useState(300);
   const [isLoading, setIsLoading] = useState(false);
-  const { email } = useEmail();
 
   useEffect(() => {
     const timer = setInterval(() => {
@@ -66,8 +68,29 @@ const CheckEmail = () => {
   };
 
   return (
-    <div>
+    <div className="text-center">
       <Toaster />
+      <div className="flex flex-col justify-center items-center">
+        <svg
+          xmlns="http://www.w3.org/2000/svg"
+          width="80"
+          height="80"
+          viewBox="0 0 24 24"
+          fill="none"
+          stroke="currentColor"
+          strokeWidth="2"
+          strokeLinecap="round"
+          strokeLinejoin="round"
+          className="lucide lucide-mail border rounded-full p-4 mb-6"
+        >
+          <rect width="20" height="16" x="2" y="4" rx="2" />
+          <path d="m22 7-8.97 5.7a1.94 1.94 0 0 1-2.06 0L2 7" />
+        </svg>
+        <AuthHeading
+        heading="Check your email"
+        subheading="We have sent you a password reset link, kindly check your email or spam folder"
+      />
+      </div>
       <p className="mt-8">
         You can request another link in {formatTime(timeLeft)}
       </p>
